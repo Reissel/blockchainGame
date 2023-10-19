@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
+import "hardhat/console.sol";
 
 /*
 struct Warrior {
@@ -36,17 +37,17 @@ enum Class {
     Archer
 }
 
-library Player {
+struct Playable_Character {
+    int healthpoints;
+    int energy;
+    int damage;
+    int strength;
+    int wisdom;
+    int agility;
+    Class class;
+}
 
-    struct Playable_Character {
-        int healthpoints;
-        int energy;
-        int damage;
-        int strength;
-        int wisdom;
-        int agility;
-        Class class;
-    }
+library Player {
 
     function damage(Playable_Character memory character, int hitpoints) public pure returns (Playable_Character memory) {
         character.healthpoints -= hitpoints;
@@ -67,5 +68,46 @@ library Player {
         return healed;
     }
 
+    function levelUp(Playable_Character memory character, int strength, int wisdom, int agility) public pure returns (Playable_Character memory) {
+        if ((strength + wisdom + agility) != 3) {
+            console.log("Invalid value to levelUp");
+            return character;
+        }
+        character.strength += strength;
+        character.wisdom += wisdom;
+        character.agility += agility;
+        return character;
+    }
+
 }
 
+abstract contract Playable_CharacterGenerator {
+    
+    function createPlayableCharacter(Class class) public pure returns (Playable_Character memory) {
+        if (class == Class.Warrior) {
+            int healthpoints = 25;
+            int energy = 4;
+            int damage = 9;
+            int strength = 5;
+            int wisdom = 2;
+            int agility = 3;
+            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
+        } else if (class == Class.Healer) {
+            int healthpoints = 15;
+            int energy = 10;
+            int damage = 6;
+            int strength = 3;
+            int wisdom = 5;
+            int agility = 2;
+            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
+        } else {
+            int healthpoints = 10;
+            int energy = 6;
+            int damage = 15;
+            int strength = 2;
+            int wisdom = 3;
+            int agility = 5;
+            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
+        }
+    }
+}
