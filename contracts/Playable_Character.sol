@@ -49,7 +49,7 @@ struct Playable_Character {
 
 library Player {
 
-    function damage(Playable_Character memory character, int hitpoints) public pure returns (Playable_Character memory) {
+    function takesDamage(Playable_Character memory character, int hitpoints) public pure returns (Playable_Character memory) {
         character.healthpoints -= hitpoints;
         return character;
     }
@@ -66,17 +66,6 @@ library Player {
         int healed_amount = healer.wisdom * 2;
         healed.healthpoints += healed_amount;
         return healed;
-    }
-
-    function levelUp(Playable_Character memory character, int strength, int wisdom, int agility) public pure returns (Playable_Character memory) {
-        if ((strength + wisdom + agility) != 3) {
-            console.log("Invalid value to levelUp");
-            return character;
-        }
-        character.strength += strength;
-        character.wisdom += wisdom;
-        character.agility += agility;
-        return character;
     }
 
 }
