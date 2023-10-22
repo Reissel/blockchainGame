@@ -4,7 +4,7 @@ import "hardhat/console.sol";
 
 /*
 struct Warrior {
-    int healthpoints = 25;
+    int healthPoints = 25;
     int energy = 4;
     int damage = 9;
     int strength = 5;
@@ -13,7 +13,7 @@ struct Warrior {
 }
 
 struct Healer {
-    int healthpoints = 15;
+    int healthPoints = 15;
     int energy = 10;
     int damage = 6;
     int strength = 3;
@@ -22,7 +22,7 @@ struct Healer {
 }
 
 struct Archer {
-    int healthpoints = 10;
+    int healthPoints = 10;
     int energy = 6;
     int damage = 15;
     int strength = 2;
@@ -38,7 +38,7 @@ enum Class {
 }
 
 struct Playable_Character {
-    int healthpoints;
+    int healthPoints;
     int energy;
     int damage;
     int strength;
@@ -47,10 +47,10 @@ struct Playable_Character {
     Class class;
 }
 
-library Player {
+library PlayerLib {
 
     function takesDamage(Playable_Character memory character, int hitpoints) public pure returns (Playable_Character memory) {
-        character.healthpoints -= hitpoints;
+        character.healthPoints -= hitpoints;
         return character;
     }
 
@@ -64,7 +64,7 @@ library Player {
 
     function getHealed(Playable_Character calldata healer, Playable_Character memory healed) public pure returns (Playable_Character memory) {
         int healed_amount = healer.wisdom * 2;
-        healed.healthpoints += healed_amount;
+        healed.healthPoints += healed_amount;
         return healed;
     }
 
@@ -74,29 +74,29 @@ abstract contract Playable_CharacterGenerator {
     
     function createPlayableCharacter(Class class) public pure returns (Playable_Character memory) {
         if (class == Class.Warrior) {
-            int healthpoints = 25;
+            int healthPoints = 25;
             int energy = 4;
             int damage = 9;
             int strength = 5;
             int wisdom = 2;
             int agility = 3;
-            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
+            return Playable_Character(healthPoints, energy, damage, strength, wisdom, agility, class);
         } else if (class == Class.Healer) {
-            int healthpoints = 15;
+            int healthPoints = 15;
             int energy = 10;
             int damage = 6;
             int strength = 3;
             int wisdom = 5;
             int agility = 2;
-            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
+            return Playable_Character(healthPoints, energy, damage, strength, wisdom, agility, class);
         } else {
-            int healthpoints = 10;
+            int healthPoints = 10;
             int energy = 6;
             int damage = 15;
             int strength = 2;
             int wisdom = 3;
             int agility = 5;
-            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
+            return Playable_Character(healthPoints, energy, damage, strength, wisdom, agility, class);
         }
     }
 }
