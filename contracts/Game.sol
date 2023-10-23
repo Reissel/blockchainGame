@@ -23,7 +23,8 @@ contract Game {
         GM_Creation_Round,
         Player_Creation_Round,
         Game_Start,
-        Game_Finished
+        Game_Finished,
+        Game_Over
     }
     GameStage public gameStage;
 
@@ -41,14 +42,27 @@ contract Game {
     address[] private playerList;
 
     function incrementTurnIndex() private {
-        
-        // Skip Enemy check
-        if(turnIndex != 0 && gameStage == GameStage.Game_Start) {
-            // Skip turn of deceased players
-            if(players[playerList[turnIndex]].character.healthPoints == 0) turnIndex += 1;
-        }
+
+        int deadPlayer = 0;
+
+        if(gameStage == GameStage.Game_Finished) return;
 
         turnIndex += 1;
+
+        // Loops through players to validate if a player 
+        for (uint256 i = 0; i < playerList.length; i++) {
+
+            if(players[playerList[i]].character.healthPoints == 0 && players[playerList[i]].turnTime == turnIndex) {
+                turnIndex += 1;
+                deadPlayer += 1;
+            }
+
+        }
+
+        if(deadPlayer == 3) {
+            gameStage = GameStage.Game_Over;
+        }
+        
         // Reset turn Order
         if(turnIndex > 3) turnIndex = 0;
     }
@@ -149,7 +163,7 @@ contract Game {
 
         require(
             gameStage == GameStage.Game_Start,
-            "Can't attack the enemy in this game stage!"
+            "Can only attack the enemy when the game has already started!"
         );
 
         require(
@@ -162,7 +176,6 @@ contract Game {
         if(enemy.isDefeated()) {
             emit EnemyDefeated();
             gameStage = GameStage.Game_Finished;
-            turnIndex = 0;
         }
 
         incrementTurnIndex();
@@ -172,11 +185,20 @@ contract Game {
     function attackPlayer(address player) public {
 
         require(
+            gameStage == GameStage.Game_Start,
+            "Can only attack a player when the game has already started!"
+        );
+
+        require(
             msg.sender == gameMaster,
             "Only the Game Master can attack with the Enemy!"
         );
 
-        // Checks turn
+        require(
+            players[player].character.healthPoints != 0,
+            "You can't attack a player that is already defeated!"
+        );
+
         require(
             turnIndex == players[msg.sender].turnTime,
             "It's not the Enemy turn yet!"
@@ -189,6 +211,11 @@ contract Game {
 
     // Enemy attacks
     function healPlayer(address player) public {
+
+        require(
+            turnIndex == players[msg.sender].turnTime,
+            "It's not your turn yet!"
+        );
 
         require(
             players[msg.sender].enemy.healthPoints == 0 && players[msg.sender].enemy.damage == 0,

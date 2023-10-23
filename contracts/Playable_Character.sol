@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
+import "../utils/MathUtils.sol";
 
 /*
 struct Warrior {
@@ -47,9 +48,10 @@ struct Playable_Character {
 }
 
 library PlayerLib {
+    using MathUtils for int;
 
     function takesDamage(Playable_Character memory character, int hitpoints) public pure returns (Playable_Character memory) {
-        character.healthPoints -= hitpoints;
+        character.healthPoints = character.healthPoints.subtractOrZero(hitpoints);
         return character;
     }
 
