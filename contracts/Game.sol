@@ -110,6 +110,11 @@ contract Game {
         for (uint256 i = 0; i < playerList.length; i++) {
 
             require(
+                msg.sender != players[playerList[i]].id,
+                "You're already in the game!"
+            );
+            
+            require(
                 class != players[playerList[i]].character.class,
                 "There is already a player using that class!"
             );
