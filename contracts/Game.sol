@@ -35,11 +35,19 @@ contract Game {
         uint256 turnTime;
     }
 
-    address private gameMaster;
+    address public gameMaster;
 
     mapping(address => Player) public players;
 
     address[] private playerList;
+
+    function getPlayer(address myAddress) public view returns(Player memory){
+        return players[myAddress];
+    }
+
+    function getPlayerListLength() public view returns (uint256) {
+        return playerList.length;
+    }
 
     function incrementTurnIndex() private {
 
@@ -99,12 +107,14 @@ contract Game {
 
 
     // Creates a new character for a player
-    function createCharacter(Class class) public {
+    function createCharacter(int classInput) public {
 
         require(
             gameStage == GameStage.Player_Creation_Round,
             "Can't create a Player in this game stage!"
         );
+
+        Class class = Class(classInput);
 
         // Searches if another player has already picked the same class
         for (uint256 i = 0; i < playerList.length; i++) {
