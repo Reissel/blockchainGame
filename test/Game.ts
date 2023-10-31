@@ -126,6 +126,19 @@ describe("Game", async function () {
       
     });
 
+    it("Should not add a player that is already in the game", async function () {
+
+      const { game, otherAccount } = await loadFixture(deploy);
+      await game.createEnemy(10,2);
+
+      await game.connect(otherAccount).createCharacter(0);
+
+      await expect(
+        (game.connect(otherAccount).createCharacter(1))
+      ).to.be.revertedWith("You're already in the game!");
+
+    });
+
     it("Should not create a class that is already in use", async function () {
 
       const { game, otherAccount, otherAccount2 } = await loadFixture(deploy);
@@ -155,6 +168,14 @@ describe("Game", async function () {
   });
 
   describe("Game Start", function () {
+    it("Should be at the stage GM_Creation_Round", async function () {
+
+      const { game } = await loadFixture(gameStart);
+      
+      expect((await game.gameStage()).toString()).to.equal('2');
+      
+    });
+
     it("Should damage a Player", async function () {
 
       const { game, otherAccount } = await loadFixture(gameStart);
@@ -165,6 +186,7 @@ describe("Game", async function () {
       await game.attackPlayer(otherAccount.address);
 
       expect((await game.getPlayer(otherAccount.address)).character.healthPoints).to.equal(otherAccount__healthPoints - enemy__damage);
+
     });
 
     it("Should damage the Enemy", async function () {
@@ -178,6 +200,7 @@ describe("Game", async function () {
       await game.connect(otherAccount).attackEnemy();
 
       expect((await game.enemy()).healthPoints).to.equal(enemy__healthPoints - otherAccount__damage);
+
     });
 
     it("Should kill the Enemy and be at stage Game_Finished", async function () {
@@ -190,6 +213,7 @@ describe("Game", async function () {
 
       expect((await game.enemy()).healthPoints).to.equal(0);
       expect((await game.gameStage()).toString()).to.equal('3');
+
     });
   });
 })
