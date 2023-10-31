@@ -26,6 +26,32 @@ describe("Game", async function () {
     return { game, owner, otherAccount, otherAccount2, otherAccount3 };
   }
 
+  async function gameStart() {
+
+    const PlayerLib__factory = await ethers.getContractFactory("PlayerLib");
+    const playerLib = await PlayerLib__factory.deploy();
+    const EnemyLib__factory = await ethers.getContractFactory("EnemyLib");
+    const enemyLib = await EnemyLib__factory.deploy();
+
+    const [owner, otherAccount, otherAccount2, otherAccount3] = await ethers.getSigners();
+
+    const Game = await ethers.getContractFactory("Game", {
+      libraries: {
+        PlayerLib: (await playerLib.getAddress()),
+        EnemyLib: (await enemyLib.getAddress()),
+      }
+    });
+    const game = await Game.deploy();
+
+    await game.createEnemy(10,2);
+
+    await game.connect(otherAccount).createCharacter(0);
+    await game.connect(otherAccount2).createCharacter(1);
+    await game.connect(otherAccount3).createCharacter(2);
+
+    return { game, owner, otherAccount, otherAccount2, otherAccount3 };
+  }
+
   describe("Deployment", function () {
     it("Should be at the stage GM_Creation_Round", async function () {
 
@@ -125,6 +151,45 @@ describe("Game", async function () {
       expect(await game.getPlayerListLength()).to.equal(3);
       expect((await game.gameStage()).toString()).to.equal('2');
       
+    });
+  });
+
+  describe("Game Start", function () {
+    it("Should damage a Player", async function () {
+
+      const { game, otherAccount } = await loadFixture(gameStart);
+
+      const otherAccount__healthPoints = (await game.getPlayer(otherAccount.address)).character.healthPoints;
+      const enemy__damage = (await game.enemy()).damage;
+
+      await game.attackPlayer(otherAccount.address);
+
+      expect((await game.getPlayer(otherAccount.address)).character.healthPoints).to.equal(otherAccount__healthPoints - enemy__damage);
+    });
+
+    it("Should damage the Enemy", async function () {
+
+      const { game, otherAccount } = await loadFixture(gameStart);
+
+      const otherAccount__damage = (await game.getPlayer(otherAccount.address)).character.damage;
+      const enemy__healthPoints = (await game.enemy()).healthPoints;
+
+      await game.attackPlayer(otherAccount.address);
+      await game.connect(otherAccount).attackEnemy();
+
+      expect((await game.enemy()).healthPoints).to.equal(enemy__healthPoints - otherAccount__damage);
+    });
+
+    it("Should kill the Enemy and be at stage Game_Finished", async function () {
+
+      const { game, otherAccount, otherAccount2 } = await loadFixture(gameStart);
+
+      await game.attackPlayer(otherAccount.address);
+      await game.connect(otherAccount).attackEnemy();
+      await game.connect(otherAccount2).attackEnemy();
+
+      expect((await game.enemy()).healthPoints).to.equal(0);
+      expect((await game.gameStage()).toString()).to.equal('3');
     });
   });
 })
