@@ -31,7 +31,7 @@ struct Archer {
 }
 */
 
-enum Class {
+enum RPGClass {
     Warrior,
     Healer,
     Archer
@@ -44,7 +44,7 @@ struct Playable_Character {
     int strength;
     int wisdom;
     int agility;
-    Class class;
+    RPGClass class;
 }
 
 library PlayerLib {

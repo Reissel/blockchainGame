@@ -114,7 +114,7 @@ contract Game {
             "Can't create a Player in this game stage!"
         );
 
-        Class class = Class(classInput);
+        RPGClass class = RPGClass(classInput);
 
         // Searches if another player has already picked the same class
         for (uint256 i = 0; i < playerList.length; i++) {
@@ -133,7 +133,7 @@ contract Game {
 
         players[msg.sender].id = msg.sender;
 
-        if (class == Class.Warrior) {
+        if (class == RPGClass.Warrior) {
             int healthPoints = 25;
             int energy = 4;
             int damage = 9;
@@ -141,7 +141,7 @@ contract Game {
             int wisdom = 2;
             int agility = 3;
             players[msg.sender].character = Playable_Character(healthPoints, energy, damage, strength, wisdom, agility, class);
-        } else if (class == Class.Healer) {
+        } else if (class == RPGClass.Healer) {
             int healthPoints = 15;
             int energy = 10;
             int damage = 6;

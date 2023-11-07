@@ -126,6 +126,44 @@ describe("Game", async function () {
 
     });
 
+    it("Should create Healer and increment turnIndex", async function () {
+
+      const { game, otherAccount } = await loadFixture(deploy);
+      await game.createEnemy(10, 2);
+
+      await game.connect(otherAccount).createCharacter(1);
+
+      expect(await game.getPlayerListLength()).to.equal(1);
+      expect((((await game.getPlayer(otherAccount.address)).character.class))).to.equal(1);
+      expect((((await game.getPlayer(otherAccount.address)).character.healthPoints))).to.equal(15);
+      expect((((await game.getPlayer(otherAccount.address)).character.energy))).to.equal(10);
+      expect((((await game.getPlayer(otherAccount.address)).character.damage))).to.equal(6);
+      expect((((await game.getPlayer(otherAccount.address)).character.strength))).to.equal(3);
+      expect((((await game.getPlayer(otherAccount.address)).character.wisdom))).to.equal(5);
+      expect((((await game.getPlayer(otherAccount.address)).character.agility))).to.equal(2);
+      expect((await game.turnIndex()).toString()).to.equal('2');
+
+    });
+
+    it("Should create Archer and increment turnIndex", async function () {
+
+      const { game, otherAccount } = await loadFixture(deploy);
+      await game.createEnemy(10, 2);
+
+      await game.connect(otherAccount).createCharacter(2);
+
+      expect(await game.getPlayerListLength()).to.equal(1);
+      expect((((await game.getPlayer(otherAccount.address)).character.class))).to.equal(2);
+      expect((((await game.getPlayer(otherAccount.address)).character.healthPoints))).to.equal(10);
+      expect((((await game.getPlayer(otherAccount.address)).character.energy))).to.equal(6);
+      expect((((await game.getPlayer(otherAccount.address)).character.damage))).to.equal(15);
+      expect((((await game.getPlayer(otherAccount.address)).character.strength))).to.equal(2);
+      expect((((await game.getPlayer(otherAccount.address)).character.wisdom))).to.equal(3);
+      expect((((await game.getPlayer(otherAccount.address)).character.agility))).to.equal(5);
+      expect((await game.turnIndex()).toString()).to.equal('2');
+
+    });
+
     it("Should not add a player that is already in the game", async function () {
 
       const { game, otherAccount } = await loadFixture(deploy);
@@ -216,7 +254,7 @@ describe("Game", async function () {
 
     });
 
-    it("Should healer a Player", async function () {
+    it("Should heal a Player", async function () {
 
       const { game, otherAccount, otherAccount2 } = await loadFixture(gameStart);
 
@@ -226,6 +264,24 @@ describe("Game", async function () {
 
       expect((await game.getPlayer(otherAccount2.address)).character.energy).to.equal(8);
       expect((await game.getPlayer(otherAccount.address)).character.healthPoints).to.equal(25);
+
+    });
+
+    it("Should heal a Player not to full life", async function () {
+
+      const { game, otherAccount, otherAccount2, otherAccount3 } = await loadFixture(gameStart);
+
+      //First round
+      await game.attackPlayer(otherAccount.address);
+      await game.connect(otherAccount).attackEnemy();
+      await game.connect(otherAccount2).healPlayer(otherAccount2.address);
+      await game.connect(otherAccount3).healPlayer(otherAccount3.address);
+
+      //Second round
+      await game.attackPlayer(otherAccount.address);
+      await game.connect(otherAccount).healPlayer(otherAccount.address);
+
+      expect((await game.getPlayer(otherAccount.address)).character.healthPoints).to.equal(23);
 
     });
   });
