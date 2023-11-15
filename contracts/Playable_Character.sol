@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
-import "hardhat/console.sol";
+import "../utils/MathUtils.sol";
 
 /*
 struct Warrior {
-    int healthpoints = 25;
+    int healthPoints = 25;
     int energy = 4;
     int damage = 9;
     int strength = 5;
@@ -13,7 +13,7 @@ struct Warrior {
 }
 
 struct Healer {
-    int healthpoints = 15;
+    int healthPoints = 15;
     int energy = 10;
     int damage = 6;
     int strength = 3;
@@ -22,7 +22,7 @@ struct Healer {
 }
 
 struct Archer {
-    int healthpoints = 10;
+    int healthPoints = 10;
     int energy = 6;
     int damage = 15;
     int strength = 2;
@@ -31,72 +31,42 @@ struct Archer {
 }
 */
 
-enum Class {
+enum RPGClass {
     Warrior,
     Healer,
     Archer
 }
 
 struct Playable_Character {
-    int healthpoints;
+    int healthPoints;
     int energy;
     int damage;
     int strength;
     int wisdom;
     int agility;
-    Class class;
+    RPGClass class;
 }
 
-library Player {
+library PlayerLib {
+    using MathUtils for int;
 
     function takesDamage(Playable_Character memory character, int hitpoints) public pure returns (Playable_Character memory) {
-        character.healthpoints -= hitpoints;
+        character.healthPoints = character.healthPoints.subtractOrZero(hitpoints);
         return character;
     }
 
     function useEnergy(Playable_Character memory character, int energy_spent) public pure returns (Playable_Character memory) {
-        if (character.energy < 2)
-            return character;
-        //Needs to validate when using energy that there was no energy spent, so the character can't heal
         character.energy -= energy_spent;
         return character;
     }
 
-    function getHealed(Playable_Character calldata healer, Playable_Character memory healed) public pure returns (Playable_Character memory) {
-        int healed_amount = healer.wisdom * 2;
-        healed.healthpoints += healed_amount;
-        return healed;
+    function getHealed(Playable_Character memory character, int hitpoints) public pure returns (Playable_Character memory) {
+
+        int maxLife = character.strength * 5;
+        character.healthPoints += hitpoints;
+
+        if(character.healthPoints > maxLife) character.healthPoints = maxLife;
+        return character;
     }
 
-}
-
-abstract contract Playable_CharacterGenerator {
-    
-    function createPlayableCharacter(Class class) public pure returns (Playable_Character memory) {
-        if (class == Class.Warrior) {
-            int healthpoints = 25;
-            int energy = 4;
-            int damage = 9;
-            int strength = 5;
-            int wisdom = 2;
-            int agility = 3;
-            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
-        } else if (class == Class.Healer) {
-            int healthpoints = 15;
-            int energy = 10;
-            int damage = 6;
-            int strength = 3;
-            int wisdom = 5;
-            int agility = 2;
-            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
-        } else {
-            int healthpoints = 10;
-            int energy = 6;
-            int damage = 15;
-            int strength = 2;
-            int wisdom = 3;
-            int agility = 5;
-            return Playable_Character(healthpoints, energy, damage, strength, wisdom, agility, class);
-        }
-    }
 }
